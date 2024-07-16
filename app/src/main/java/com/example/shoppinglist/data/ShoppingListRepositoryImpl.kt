@@ -21,7 +21,7 @@ object ShoppingListRepositoryImpl: ShoppinListRepository {
     }
 
     init {
-        for (i in 0..100) {
+        for (i in 0..20) {
             val item = ShoppingItem("Name $i", i, Random.nextBoolean())
             addShoppingItem(item)
         }
