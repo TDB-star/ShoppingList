@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun onShoppingItemClick() {
         adapter.onShoppingItemClickListener = {
-            Log.d("MainActivity", it.toString())
+            // TODO
         }
     }
 
