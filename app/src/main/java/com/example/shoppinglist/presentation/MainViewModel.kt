@@ -21,9 +21,6 @@ class MainViewModel : ViewModel() {
 
     val shoppingList = getShoppingListUseCase.getShoppingList()
 
-    fun getShoppingItem(itemId: Int) {
-        getShoppingItemUseCase.getShoppingItem(itemId)
-    }
 
     fun deleteShoppingItem(item: ShoppingItem) {
         removeShoppingItemUseCase.removeShoppingItem(item)
