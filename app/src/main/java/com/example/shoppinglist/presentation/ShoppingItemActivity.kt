@@ -32,49 +32,51 @@ class ShoppingItemActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_shopping_item)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+//            insets
+//        }
 
-        parseIntent()
-        viewModel = ViewModelProvider(this)[ShoppingItemViewModel::class.java]
-        initViews()
-        textChangedListeners()
+       parseIntent()
+
         launchScreen()
-        observeViewModel()
+    //    observeViewModel()
     }
 
-    private fun observeViewModel() {
-        viewModel.errorInputName.observe(this) {
-            val message = if (it) {
-                getString(R.string.error_input_name)
-            } else {
-                null
-            }
-            textInputLayoutName.error = message
-        }
-
-        viewModel.errorInputCount.observe(this) {
-            val message = if (it) {
-                getString(R.string.error_input_count)
-            } else {
-                null
-            }
-            textInputLayoutCount.error = message
-        }
-
-        viewModel.onShoppingListActivity.observe(this) {
-            finish()
-        }
-    }
+//    private fun observeViewModel() {
+//        viewModel.errorInputName.observe(this) {
+//            val message = if (it) {
+//                getString(R.string.error_input_name)
+//            } else {
+//                null
+//            }
+//            textInputLayoutName.error = message
+//        }
+//
+//        viewModel.errorInputCount.observe(this) {
+//            val message = if (it) {
+//                getString(R.string.error_input_count)
+//            } else {
+//                null
+//            }
+//            textInputLayoutCount.error = message
+//        }
+//
+//        viewModel.onShoppingListActivity.observe(this) {
+//            finish()
+//        }
+//    }
 
     private fun launchScreen() {
-        when (screenMode) {
-            MODE_EDIT -> launchEditMode()
-            MODE_ADD -> launchAddMode()
+        val fragment = when (screenMode) {
+            MODE_EDIT -> ShoppingItemFragment.newInstanceEditItem(shoppingItemId)
+            MODE_ADD -> ShoppingItemFragment.newInstanceAddItem()
+            else -> throw RuntimeException("Unknown  screen mode $screenMode")
         }
+        supportFragmentManager.beginTransaction()
+            .add(R.id.shopping_item_container, fragment)
+            .commit()
     }
 
     private fun textChangedListeners() {
@@ -103,25 +105,25 @@ class ShoppingItemActivity : AppCompatActivity() {
         })
     }
 
-    private fun launchEditMode() {
-        viewModel.getShoppingItem(shoppingItemId)
-        viewModel.shoppingItem.observe(this) {
-            editTextName.setText(it.name)
-            editTextCount.setText(it.count.toString())
-        }
-        buttonSave.setOnClickListener {
-            viewModel.editShoppingItem(
-                editTextName.text?.toString(),
-                editTextCount.text?.toString()
-            )
-        }
-    }
+//    private fun launchEditMode() {
+//        viewModel.getShoppingItem(shoppingItemId)
+//        viewModel.shoppingItem.observe(this) {
+//            editTextName.setText(it.name)
+//            editTextCount.setText(it.count.toString())
+//        }
+//        buttonSave.setOnClickListener {
+//            viewModel.editShoppingItem(
+//                editTextName.text?.toString(),
+//                editTextCount.text?.toString()
+//            )
+//        }
+//    }
 
-    private fun launchAddMode() {
-        buttonSave.setOnClickListener {
-            viewModel.addShoppingItem(editTextName.text?.toString(), editTextCount.text?.toString())
-        }
-    }
+//    private fun launchAddMode() {
+//        buttonSave.setOnClickListener {
+//            viewModel.addShoppingItem(editTextName.text?.toString(), editTextCount.text?.toString())
+//        }
+//    }
 
     private fun parseIntent() {
         if (!intent.hasExtra(EXTRA_SCREEN_MODE)) {
@@ -139,14 +141,6 @@ class ShoppingItemActivity : AppCompatActivity() {
             }
             shoppingItemId = intent.getIntExtra(EXTRA_SHOPPING_ITEM_ID, ShoppingItem.UNDEFINED_ID)
         }
-    }
-
-    private fun initViews() {
-        textInputLayoutName = findViewById(R.id.textInputLayoutName)
-        textInputLayoutCount = findViewById(R.id.textInputLayoutCount)
-        editTextName = findViewById(R.id.editTextName)
-        editTextCount = findViewById(R.id.editTextCount)
-        buttonSave = findViewById(R.id.buttonSave)
     }
 
     companion object {
