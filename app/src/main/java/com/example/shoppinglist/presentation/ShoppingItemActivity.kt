@@ -18,12 +18,6 @@ import com.google.android.material.textfield.TextInputLayout
 
 class ShoppingItemActivity : AppCompatActivity() {
 
-    private lateinit var textInputLayoutName: TextInputLayout
-    private lateinit var textInputLayoutCount: TextInputLayout
-    private lateinit var editTextName: EditText
-    private lateinit var editTextCount: EditText
-    private lateinit var buttonSave: Button
-
     private lateinit var viewModel: ShoppingItemViewModel
     private var screenMode = MODE_UNKNOWN
     private var shoppingItemId = ShoppingItem.UNDEFINED_ID
@@ -32,41 +26,11 @@ class ShoppingItemActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_shopping_item)
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
-
-       parseIntent()
-
-        launchScreen()
-    //    observeViewModel()
+        parseIntent()
+        if (savedInstanceState == null) {
+            launchScreen()
+        }
     }
-
-//    private fun observeViewModel() {
-//        viewModel.errorInputName.observe(this) {
-//            val message = if (it) {
-//                getString(R.string.error_input_name)
-//            } else {
-//                null
-//            }
-//            textInputLayoutName.error = message
-//        }
-//
-//        viewModel.errorInputCount.observe(this) {
-//            val message = if (it) {
-//                getString(R.string.error_input_count)
-//            } else {
-//                null
-//            }
-//            textInputLayoutCount.error = message
-//        }
-//
-//        viewModel.onShoppingListActivity.observe(this) {
-//            finish()
-//        }
-//    }
 
     private fun launchScreen() {
         val fragment = when (screenMode) {
@@ -75,34 +39,8 @@ class ShoppingItemActivity : AppCompatActivity() {
             else -> throw RuntimeException("Unknown  screen mode $screenMode")
         }
         supportFragmentManager.beginTransaction()
-            .add(R.id.shopping_item_container, fragment)
+            .replace(R.id.shopping_item_container, fragment)
             .commit()
-    }
-
-    private fun textChangedListeners() {
-        editTextName.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.resetErrorInputName()
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-        })
-
-        editTextCount.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.resetErrorInputCount()
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-        })
     }
 
     private fun parseIntent() {

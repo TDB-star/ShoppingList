@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun onShoppingItemClick() {
         adapter.onShoppingItemClickListener = { item -> ShoppingItem
-            // TODO
             val intent = ShoppingItemActivity.newIntentEditItem(this, item.id)
             startActivity(intent)
         }
