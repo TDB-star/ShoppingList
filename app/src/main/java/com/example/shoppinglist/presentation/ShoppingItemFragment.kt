@@ -1,7 +1,5 @@
 package com.example.shoppinglist.presentation
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,17 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import androidx.activity.enableEdgeToEdge
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.shoppinglist.R
 import com.example.shoppinglist.domain.ShoppingItem
 import com.google.android.material.textfield.TextInputLayout
 
-class ShoppingItemFragment(
-    private val screenMode: String = MODE_UNKNOWN,
-    private val shoppingItemId: Int = ShoppingItem.UNDEFINED_ID
-): Fragment() {
+class ShoppingItemFragment: Fragment() {
 
     private lateinit var textInputLayoutName: TextInputLayout
     private lateinit var textInputLayoutCount: TextInputLayout
@@ -29,6 +23,15 @@ class ShoppingItemFragment(
     private lateinit var buttonSave: Button
 
     private lateinit var viewModel: ShoppingItemViewModel
+
+    private var screenMode: String = MODE_UNKNOWN
+    private var shoppingItemId: Int = ShoppingItem.UNDEFINED_ID
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        parseParams()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,8 +43,6 @@ class ShoppingItemFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        parseParams()
         viewModel = ViewModelProvider(this)[ShoppingItemViewModel::class.java]
         initViews(view)
         textChangedListeners()
@@ -127,11 +128,21 @@ class ShoppingItemFragment(
     }
 
     private fun parseParams() {
-        if (screenMode != MODE_EDIT && screenMode != MODE_ADD) {
+        val args = requireArguments()
+        if (!args.containsKey(SCREEN_MODE)) {
             throw RuntimeException("Screen mode parameter is absent")
         }
-        if (screenMode == MODE_EDIT && shoppingItemId == ShoppingItem.UNDEFINED_ID) {
+        val mode = args.getString(SCREEN_MODE)
+        if (mode != MODE_EDIT && mode != MODE_ADD) {
+            throw RuntimeException("Unknown  screen mode $mode")
+        }
+        screenMode = mode
+
+        if (screenMode == MODE_EDIT) {
+            if (!args.containsKey(SHOPPING_ITEM_ID)) {
                 throw RuntimeException("Parameter shopping item id is absent")
+            }
+            shoppingItemId = args.getInt(SHOPPING_ITEM_ID, ShoppingItem.UNDEFINED_ID)
         }
     }
 
@@ -143,33 +154,29 @@ class ShoppingItemFragment(
         buttonSave = view.findViewById(R.id.buttonSave)
     }
 
-
     companion object {
-        private const val EXTRA_SCREEN_MODE = "extra_mode"
-        private const val EXTRA_SHOPPING_ITEM_ID = "extra_shopping_item_id"
+        private const val SCREEN_MODE = "extra_mode"
+        private const val SHOPPING_ITEM_ID = "extra_shopping_item_id"
         private const val MODE_EDIT = "mode_edit"
         private const val MODE_ADD = "mode_add"
         private const val MODE_UNKNOWN = ""
 
         fun newInstanceAddItem(): ShoppingItemFragment {
-            return ShoppingItemFragment(MODE_ADD)
+            val args = Bundle().apply {
+                putString(SCREEN_MODE, MODE_ADD)
+            }
+            return ShoppingItemFragment().apply {
+                arguments = args
+            }
         }
 
         fun newInstanceEditItem(shoppingItemId: Int): ShoppingItemFragment {
-            return ShoppingItemFragment(MODE_EDIT, shoppingItemId)
-        }
-
-        fun newIntentAddItem(context: Context): Intent {
-            val intent = Intent(context, ShoppingItemActivity::class.java)
-            intent.putExtra(EXTRA_SCREEN_MODE, MODE_ADD)
-            return intent
-        }
-
-        fun newIntentEditItem(context: Context, itemId: Int): Intent {
-            val intent = Intent(context, ShoppingItemActivity::class.java)
-            intent.putExtra(EXTRA_SCREEN_MODE, MODE_EDIT)
-            intent.putExtra(EXTRA_SHOPPING_ITEM_ID, itemId)
-            return intent
+            val args = Bundle()
+            args.putString(SCREEN_MODE, MODE_EDIT)
+            args.putInt(SHOPPING_ITEM_ID, shoppingItemId)
+            return ShoppingItemFragment().apply {
+                arguments = args
+            }
         }
     }
 }

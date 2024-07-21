@@ -105,26 +105,6 @@ class ShoppingItemActivity : AppCompatActivity() {
         })
     }
 
-//    private fun launchEditMode() {
-//        viewModel.getShoppingItem(shoppingItemId)
-//        viewModel.shoppingItem.observe(this) {
-//            editTextName.setText(it.name)
-//            editTextCount.setText(it.count.toString())
-//        }
-//        buttonSave.setOnClickListener {
-//            viewModel.editShoppingItem(
-//                editTextName.text?.toString(),
-//                editTextCount.text?.toString()
-//            )
-//        }
-//    }
-
-//    private fun launchAddMode() {
-//        buttonSave.setOnClickListener {
-//            viewModel.addShoppingItem(editTextName.text?.toString(), editTextCount.text?.toString())
-//        }
-//    }
-
     private fun parseIntent() {
         if (!intent.hasExtra(EXTRA_SCREEN_MODE)) {
             throw RuntimeException("Screen mode parameter is absent")
