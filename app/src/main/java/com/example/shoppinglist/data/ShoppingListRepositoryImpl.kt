@@ -2,16 +2,13 @@ package com.example.shoppinglist.data
 
 import android.app.Application
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
-import com.example.shoppinglist.domain.ShoppinListRepository
+import com.example.shoppinglist.domain.ShoppingListRepository
 import com.example.shoppinglist.domain.ShoppingItem
-import kotlin.random.Random
 
 class ShoppingListRepositoryImpl(
     application: Application
-) : ShoppinListRepository {
+) : ShoppingListRepository {
 
     private val shoppingListDao = AppDatabase.getInstance(application).shoppingListDao()
     private val mapper = ShoppingListMapper()
@@ -30,20 +27,20 @@ class ShoppingListRepositoryImpl(
         }
     }
 
-    override fun getShoppingItem(itemId: Int): ShoppingItem {
+    override suspend fun getShoppingItem(itemId: Int): ShoppingItem {
         val dbModel = shoppingListDao.getShoppingItem(itemId)
         return mapper.mapDbModelToEntity(dbModel)
     }
 
-    override fun addShoppingItem(shoppingItem: ShoppingItem) {
+    override suspend fun addShoppingItem(shoppingItem: ShoppingItem) {
       shoppingListDao.addShoppingItem(mapper.mapEntityToDbModel(shoppingItem))
     }
 
-    override fun removeShoppingItem(shoppingItem: ShoppingItem) {
+    override suspend fun removeShoppingItem(shoppingItem: ShoppingItem) {
       shoppingListDao.deleteShoppingItem(shoppingItem.id)
     }
 
-    override fun editShoppingItem(shoppingItem: ShoppingItem) {
+    override suspend fun editShoppingItem(shoppingItem: ShoppingItem) {
         shoppingListDao.addShoppingItem(mapper.mapEntityToDbModel(shoppingItem))
     }
 }

@@ -5,11 +5,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.shoppinglist.data.ShoppingListRepositoryImpl
 import com.example.shoppinglist.domain.AddShoppingItemUseCase
 import com.example.shoppinglist.domain.EditShoppingItemUseCase
 import com.example.shoppinglist.domain.GetShoppingItemUseCase
 import com.example.shoppinglist.domain.ShoppingItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class ShoppingItemViewModel(application: Application): AndroidViewModel(application) {
 
@@ -22,7 +27,6 @@ class ShoppingItemViewModel(application: Application): AndroidViewModel(applicat
     private val _errorInputName = MutableLiveData<Boolean>()
     val errorInputName: LiveData<Boolean>
         get() = _errorInputName
-
 
     private val _errorInputCount = MutableLiveData<Boolean>()
     val errorInputCount: LiveData<Boolean>
@@ -38,8 +42,10 @@ class ShoppingItemViewModel(application: Application): AndroidViewModel(applicat
         get() = _onShoppingListActivity
 
     fun getShoppingItem(itemId: Int) {
-        val item = getShoppingItemUseCase.getShoppingItem(itemId)
-        _shoppingItem.value = item
+        viewModelScope.launch {
+            val item = getShoppingItemUseCase.getShoppingItem(itemId)
+            _shoppingItem.value = item
+        }
     }
 
     fun addShoppingItem(inputName: String?, inputCount: String?) {
@@ -48,9 +54,11 @@ class ShoppingItemViewModel(application: Application): AndroidViewModel(applicat
         val fieldsValid = validateInput(name, count)
 
         if(fieldsValid) {
-            val newItem = ShoppingItem(name, count, true)
-            addShoppingItemUseCase.addShoppingItem(newItem)
-            onCloseScreen()
+            viewModelScope.launch {
+                val newItem = ShoppingItem(name, count, true)
+                addShoppingItemUseCase.addShoppingItem(newItem)
+                onCloseScreen()
+            }
         }
     }
 
@@ -61,9 +69,11 @@ class ShoppingItemViewModel(application: Application): AndroidViewModel(applicat
 
         if(fieldsValid) {
             _shoppingItem.value?.let {
-                val newItem = it.copy(name = name, count = count)
-                editShoppingItemUseCase.editShoppingItem(newItem)
-                onCloseScreen()
+                viewModelScope.launch {
+                    val newItem = it.copy(name = name, count = count)
+                    editShoppingItemUseCase.editShoppingItem(newItem)
+                    onCloseScreen()
+                }
             }
         }
     }
