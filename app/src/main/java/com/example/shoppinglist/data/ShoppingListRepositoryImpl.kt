@@ -1,56 +1,37 @@
 package com.example.shoppinglist.data
 
+import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.shoppinglist.domain.ShoppinListRepository
 import com.example.shoppinglist.domain.ShoppingItem
 import kotlin.random.Random
 
-object ShoppingListRepositoryImpl: ShoppinListRepository {
+class ShoppingListRepositoryImpl(
+    application: Application
+) : ShoppinListRepository {
 
-    private val shoppingListLiveData = MutableLiveData<List<ShoppingItem>>()
-    private val shoppingList = sortedSetOf<ShoppingItem>({ o1, o2 -> o1.id.compareTo(o2.id)})
-    private var autoIncrementedId = 0
+    private val shoppingListDao = AppDatabase.getInstance(application).shoppingListDao()
+    private val mapper = ShoppingListMapper()
 
     override fun getShoppingList(): LiveData<List<ShoppingItem>> {
-        return shoppingListLiveData
-    }
-
-    private fun updateList() {
-        shoppingListLiveData.value = shoppingList.toList()
-    }
-
-    init {
-        for (i in 0..100) {
-            val item = ShoppingItem("Name $i", i, Random.nextBoolean())
-            addShoppingItem(item)
-        }
+        return shoppingListDao.getShoppingList()
     }
 
     override fun getShoppingItem(itemId: Int): ShoppingItem {
-        return shoppingList.find {
-            it.id == itemId
-        } ?: throw
-            RuntimeException("Element with id $itemId not found")
+    val dbModel = shoppingListDao.getShoppingItem(itemId)
+        return mapper.mapDbModelToEntity(dbModel)
     }
 
     override fun addShoppingItem(shoppingItem: ShoppingItem) {
-        if (shoppingItem.id == ShoppingItem.UNDEFINED_ID) {
-            shoppingItem.id = autoIncrementedId
-            autoIncrementedId++
-        }
-        shoppingList.add(shoppingItem)
-        updateList()
+      shoppingListDao.addShoppingItem(mapper.mapEntityToDbModel(shoppingItem))
     }
 
     override fun removeShoppingItem(shoppingItem: ShoppingItem) {
-        shoppingList.remove(shoppingItem)
-        updateList()
+      shoppingListDao.deleteShoppingItem(shoppingItem.id)
     }
 
     override fun editShoppingItem(shoppingItem: ShoppingItem) {
-        val editableItem = getShoppingItem(shoppingItem.id)
-        shoppingList.remove(editableItem)
-        addShoppingItem(shoppingItem)
+        shoppingListDao.addShoppingItem(mapper.mapEntityToDbModel(shoppingItem))
     }
 }
